@@ -1,0 +1,51 @@
+### Registro de usuario
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+    "username": "test",
+    "password": "123"
+}
+
+### Login de usuario
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "username": "test",
+    "password": "123"
+}
+
+### Obtener todos los productos (protegido)
+GET http://localhost:3000/products
+
+### Obtener un producto por ID (protegido)
+GET http://localhost:3000/products/11
+
+### logout de usuario
+GET http://localhost:3000/logout
+
+### Agregar un nuevo producto (protegido)
+POST http://localhost:3000/products/
+Content-Type: application/json
+
+{
+  "name": "NewProduct",
+  "price": 100,
+  "description": "NewProductDescription",
+  "stock": 10
+}
+
+### Editar un producto por ID (protegido)
+PATCH http://localhost:3000/products/3
+Content-Type: application/json
+
+{
+  "name": "UpdatedProduct",
+  "price": 150,
+  "description": "UpdatedDescription",
+  "stock": 20
+}
+
+### Eliminar un producto por ID (protegido)
+DELETE http://localhost:3000/products/11
