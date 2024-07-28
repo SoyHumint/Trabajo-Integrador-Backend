@@ -145,6 +145,51 @@ app.get("/products/:id", isAuthenticated, async (req, res) => {
 
 });
 
+
+app.get("/product/filterProducto", isAuthenticated, async (req, res) => {
+  const client = await connectToMongoDB();
+  if (!client) {
+    return res.status(500).send("Error al conectar con MongoDB");
+  }
+  try {
+    const db = client.db('Ecomerce');
+
+    // Verificar qué parámetro de consulta está presente
+    const productId = parseInt(req.query.productNombre);
+    const productNombre = req.query.productNombre;
+
+    let query = {};
+
+    if (!isNaN(productId)) {
+      // Si productId está presente y es un número, buscar por ID
+      query = { id: productId };
+    } else if (productNombre) {
+      // Si productNombre está presente, buscar por nombre
+      query = { nombre: productNombre };
+    } else {
+      // Si ninguno de los parámetros está presente, responder con un error
+      return res.status(400).send("Debe proporcionar un ID de producto o un nombre de producto.");
+    }
+
+    const producto = await db.collection('productos').findOne(query);
+
+    if (producto) {
+      res.render("product", { product: producto });
+    } else {
+      res.status(404).send(`No se encontró el producto con ${productId ? `ID ${productId}` : `nombre ${productNombre}`}`);
+    }
+  } catch (error) {
+    console.error("Error al obtener el producto de la colección (productos):", error);
+    res.status(500).send("Error al obtener el producto de la colección (productos)");
+  } finally {
+    disconnectFromMongoDB(client);
+  }
+});
+
+
+
+
+
 app.get("/product/add", isAuthenticated, (req, res) => {
   return res.render("addProduct");
 });
