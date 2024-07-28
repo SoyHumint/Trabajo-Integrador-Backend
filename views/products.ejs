@@ -9,7 +9,11 @@
 <body>
   <h1>Listado de Productos:</h1>
 
-  <a href="/products/add">Agregar nuevo Producto</a>
+  <form action="/product/add" method="get">
+    <button type="submit">Agregar nuevo producto</button>
+    </a>
+  </form>
+
   <ul>
     <% products.forEach(function(product) { %>
       <li>

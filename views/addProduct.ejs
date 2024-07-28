@@ -9,12 +9,10 @@
 <body>
   <h1>Añadir producto</h1>
 
-  <form action="/products/" method="post">
-    <label for="id">ID:</label>
-    <input type="number" id="id" name="id" value="10" required readonly />
+  <form action="/products/add" method="post">
 
     <label for="codigo">Código:</label>
-    <input type="number" id="codigo" name="codigo" value="83635" required />
+    <input type="number" id="codigo" name="codigo" placeholder="Código del producto" required />
 
     <label for="nombre">Nombre:</label>
     <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required />
@@ -25,7 +23,7 @@
     <label for="categoria">Categoría:</label>
     <input type="text" id="categoria" name="categoria" placeholder="Categoria del producto" required />
 
-    <button type="submit">Agregar Producto</button>
+    <button type="submit">Agregar nuevo Producto</button>
   </form>
   <a href="/products">Regresar a Productos</a>
 </body>
