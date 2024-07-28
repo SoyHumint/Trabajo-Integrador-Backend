@@ -5,6 +5,8 @@ const session = require("express-session");
 const methodOverride = require("method-override"); // Permite PUT, PATCH y DELETE
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+
+
 // const products = require("./json/supermercado.json"); // Importar JSON, use este json en mongoDB.
 
 const app = express();
@@ -40,6 +42,7 @@ const users = [];
 // Función para proteger rutas
 const isAuthenticated = (req, res, next) => {
   if (!req.session.user) {
+    console.error("No hay usuario autenticado");
     return res.render("login");
   }
   next();
@@ -56,6 +59,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { username, password } = req.body;
   // Guardarlo en la BD
+  console.log(req.body)
   users.push({ username, password });
   res.render("login");
 });
@@ -126,7 +130,7 @@ app.get("/products/:id", isAuthenticated, async (req, res) => {
   }
   try {
     //viene como string y hacemos un parseInt para que se convierta en un entero o por defecto ponemos 1.
-    const productId = parseInt(req.params.id) || 1;
+    const productId = parseInt(req.params.id);
     const db = client.db('Ecomerce');
     const producto = await db.collection('productos').findOne({ id: productId });
     if (producto) res.render("product", { product: producto });
@@ -141,9 +145,9 @@ app.get("/products/:id", isAuthenticated, async (req, res) => {
 
 });
 
-// app.get("/products/add", isAuthenticated, (req, res) => {
-//   return res.render("addProduct");
-// });
+app.get("/product/add", isAuthenticated, (req, res) => {
+  return res.render("addProduct");
+});
 
 app.get("/products/add", isAuthenticated, async (req, res) => {
   const client = await connectToMongoDB();
@@ -172,6 +176,7 @@ app.get("/products/edit/:id", isAuthenticated, async (req, res) => {
   try {
     // Convierte el id de la ruta a un entero
     const productId = parseInt(req.params.id);
+    console.log(req.params)
     const db = client.db('Ecomerce');
     const product = await db.collection('productos').findOne({ id: productId });
 
@@ -201,6 +206,7 @@ app.get("/products/edit/:id", isAuthenticated, async (req, res) => {
 
 app.post("/products/add", isAuthenticated, async (req, res) => {
   const { codigo, nombre, precio, categoria } = req.body;
+  console.log(req.body);
 
   const client = await connectToMongoDB();
   if (!client) {
@@ -208,21 +214,27 @@ app.post("/products/add", isAuthenticated, async (req, res) => {
   }
   try {
     const db = client.db('Ecomerce');
+    const totalProducts = await db.collection('productos').countDocuments();
+    const totalId = totalProducts + 1;
     const newProduct = {
-      id: products.length + 10,
-      codigo,
-      nombre,
-      precio,
-      categoria,
+      id: totalId,
+      codigo: Number(codigo),
+      nombre: nombre,
+      precio: Number(precio),
+      categoria: categoria,
     };
-    await db.collection('productos').insertOne(newProduct);
+
+    const result = await db.collection('productos').insertOne(newProduct);
+    console.log(`Nuevo producto agregado con el id: ${result.insertedId}`);
     res.redirect("/products");
   } catch (error) {
+    console.error("Error en /products/add:", error);  // Agregado para mejor depuración
     res.status(500).send("Error al agregar el nuevo producto dentro de la colección (productos)");
   } finally {
     disconnectFromMongoDB(client);
   }
 });
+
 
 // app.patch("/products/:id", isAuthenticated, (req, res) => {
 //   const { id, codigo, nombre, precio, categoria } = req.body;
@@ -251,9 +263,9 @@ app.patch("/products/:id", isAuthenticated, async (req, res) => {
       { id: productId },
       {
         $set: {
-          codigo,
+          codigo: parseInt(codigo),
           nombre,
-          precio,
+          precio: parseFloat(precio),
           categoria,
         },
       }
@@ -302,6 +314,7 @@ app.delete("/products/:id", isAuthenticated, async (req, res) => {
     disconnectFromMongoDB(client);
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port http://localhost:${port}`);
